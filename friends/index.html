@@ -52,7 +52,7 @@
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/WebFriends.loader.js?v=752897ef0b9a793b";
+      var loaderUrl = buildUrl + "/WebFriends.loader.js?v=85fd042e7def01aa";
       var config = {
         arguments: [],
         dataUrl: buildUrl + "/WebFriends.data.unityweb",
@@ -113,7 +113,7 @@
       var script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = async () => {
-        const manifest = {"dataUrl": [{"url": "Build/WebFriends.data.unityweb?v=5385b8b47046ec3d", "bytes": 72676236}], "frameworkUrl": [{"url": "Build/WebFriends.framework.js.unityweb?v=2196d314d30f38ef", "bytes": 88763}], "codeUrl": [{"url": "Build/WebFriends.wasm.unityweb?v=02385cf73ad0d092", "bytes": 11911047}]};
+        const manifest = {"dataUrl": [{"url": "Build/WebFriends.data.unityweb?v=6d7d6321e2ff6749", "bytes": 72675515}], "frameworkUrl": [{"url": "Build/WebFriends.framework.js.unityweb?v=31d6d951a2349317", "bytes": 88763}], "codeUrl": [{"url": "Build/WebFriends.wasm.unityweb?v=ccb1da2b5ea4f895", "bytes": 11914706}]};
         const total = Object.values(manifest).flat().reduce((n,p)=>n+p.bytes,0);
         let received = 0;
         const blobs = [];
