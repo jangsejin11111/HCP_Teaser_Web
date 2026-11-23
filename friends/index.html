@@ -52,12 +52,12 @@
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/WebFriends.loader.js?v=8522656c1cb1e775";
+      var loaderUrl = buildUrl + "/WebFriends.loader.js?v=ccc4227c59b853d0";
       var config = {
         arguments: [],
         dataUrl: buildUrl + "/WebFriends.data.unityweb",
-        frameworkUrl: buildUrl + "/WebFriends.framework.js.unityweb?v=5d377dce50d39828",
-        codeUrl: buildUrl + "/WebFriends.wasm.unityweb?v=14ab0cf1be96031c",
+        frameworkUrl: buildUrl + "/WebFriends.framework.js.unityweb",
+        codeUrl: buildUrl + "/WebFriends.wasm.unityweb",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "HCP_Teaser",
@@ -113,17 +113,46 @@
       var script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = async () => {
-        config.dataUrl = URL.createObjectURL(new Blob(await Promise.all(["Build/WebFriends.data.unityweb.part0?v=ad74d2bb681440ac", "Build/WebFriends.data.unityweb.part1?v=aafea149348af848", "Build/WebFriends.data.unityweb.part2?v=5cd0633123c75c02"].map(async url => { const response = await fetch(url); if (!response.ok) throw new Error('Build download failed: ' + response.status); return response.arrayBuffer(); }))));
-          createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
+        const manifest = {"dataUrl": [{"url": "Build/WebFriends.data.unityweb?v=945af9669552f1af", "bytes": 76980964}], "frameworkUrl": [{"url": "Build/WebFriends.framework.js.unityweb?v=b8b6dbb72c11be0f", "bytes": 88735}], "codeUrl": [{"url": "Build/WebFriends.wasm.unityweb?v=34fb5f078fc45443", "bytes": 11912887}]};
+        const total = Object.values(manifest).flat().reduce((n,p)=>n+p.bytes,0);
+        let received = 0;
+        const blobs = [];
+        const loading = document.querySelector('#unity-loading-bar');
+        const bar = document.querySelector('#unity-progress-bar-full');
+        const status = document.createElement('div');
+        status.setAttribute('role','status'); status.setAttribute('aria-live','polite');
+        status.style.cssText='color:white;text-align:center;width:280px;margin:14px 0 0 -63px;font:14px sans-serif;line-height:1.6';
+        loading.appendChild(status);
+        const mb = n => (n/1000000).toFixed(1);
+        function draw(){const p=Math.min(100,Math.floor(received/total*100));bar.style.width=(p*.9)+'%';status.textContent='다운로드 '+p+'% · '+mb(received)+' / '+mb(total)+' MB';}
+        draw();
+        function failed(error){status.textContent='불러오지 못했습니다. 네트워크를 확인해 주세요.';const retry=document.createElement('button');retry.textContent='다시 시도';retry.onclick=()=>location.reload();status.appendChild(document.createElement('br'));status.appendChild(retry);console.error(error);}
+        async function download(part){
+          const response=await fetch(part.url);
+          if(!response.ok)throw new Error('Download HTTP '+response.status);
+          if(!response.body){const data=await response.arrayBuffer();received+=data.byteLength;draw();return data;}
+          const reader=response.body.getReader();const buffers=[];
+          for(;;){const {done,value}=await reader.read();if(done)break;buffers.push(value);received+=value.byteLength;draw();}
+          return new Blob(buffers);
+        }
+        try {
+          await Promise.all(Object.entries(manifest).map(async ([key,parts])=>{
+            const data=await Promise.all(parts.map(download));
+            const url=URL.createObjectURL(new Blob(data));blobs.push(url);config[key]=url;
+          }));
+          status.textContent='다운로드 완료 · 게임 준비 중…';
+        } catch(error){failed(error);return;}
+
+        createUnityInstance(canvas, config, (progress) => {
+          document.querySelector("#unity-progress-bar-full").style.width = (90 + 10 * progress) + "%";
               }).then((unityInstance) => {
-                document.querySelector("#unity-loading-bar").style.display = "none";
+                blobs.forEach(url=>URL.revokeObjectURL(url)); document.querySelector("#unity-loading-bar").style.display = "none";
                 document.querySelector("#unity-fullscreen-button").onclick = () => {
                   unityInstance.SetFullscreen(1);
                 };
 
               }).catch((message) => {
-                alert(message);
+                failed(message);
               });
             };
 
