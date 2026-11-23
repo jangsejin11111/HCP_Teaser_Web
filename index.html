@@ -53,12 +53,12 @@
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/WebRehearsal.loader.js?v=fb204bac9d02c04c";
+      var loaderUrl = buildUrl + "/WebRehearsal.loader.js?v=bb92b0b5baec3a24";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/WebRehearsal.data?v=b5cdfc65437ab5c1",
-        frameworkUrl: buildUrl + "/WebRehearsal.framework.js?v=c39b3680cb9e1443",
-        codeUrl: buildUrl + "/WebRehearsal.wasm?v=fdbae309f1b72601",
+        dataUrl: buildUrl + "/WebRehearsal.data",
+        frameworkUrl: buildUrl + "/WebRehearsal.framework.js?v=0881055dccb68c25",
+        codeUrl: buildUrl + "/WebRehearsal.wasm?v=5522c28639968483",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "HCP_Teaser",
@@ -113,8 +113,9 @@
 
       var script = document.createElement("script");
       script.src = loaderUrl;
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
+      script.onload = async () => {
+        config.dataUrl = URL.createObjectURL(new Blob(await Promise.all(["Build/WebRehearsal.data.part0?v=e3cd73c698ba76b9", "Build/WebRehearsal.data.part1?v=3a0cbe8a85bfe992", "Build/WebRehearsal.data.part2?v=baf6066fdeb58673"].map(async url => { const response = await fetch(url); if (!response.ok) throw new Error('Build download failed: ' + response.status); return response.arrayBuffer(); }))));
+          createUnityInstance(canvas, config, (progress) => {
           document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
               }).then((unityInstance) => {
                 document.querySelector("#unity-loading-bar").style.display = "none";
