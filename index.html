@@ -1,129 +1,94 @@
 <!DOCTYPE html>
-<html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity Web Player | HCP_Teaser</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
-  <script src="TemplateData/profiler.js"></script>
-  </head>
-  <body>
-    <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
-        </div>
-      </div>
-      <div id="unity-warning"> </div>
-      <div id="unity-footer">
-        <div id="unity-logo-title-footer"></div>
-        <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">HCP_Teaser</div>
-      </div>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080808">
+  <title>복제인간 시</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; background: #080808; color: #eae8e1; }
+    #unity-container { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+    #unity-canvas { display: block; background: #080808; }
+    #unity-footer { height: 36px; display: flex; align-items: center; justify-content: flex-end; }
+    #unity-fullscreen-button, .retry { color: #bbb9b2; background: transparent; border: 1px solid #555; padding: 6px 12px; cursor: pointer; }
+    button:focus-visible { outline: 2px solid #eae8e1; outline-offset: 4px; }
+    #unity-loading-bar { position: fixed; inset: 0; z-index: 10; background: #080808; }
+    .loading-content { position: absolute; left: 50%; top: 48%; transform: translate(-50%, -50%); width: min(80vw, 340px); text-align: center; }
+    h1 { margin: 0 0 42px; color: #ffffff; font: 700 clamp(28px, 5vw, 42px)/1.7 "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; letter-spacing: .12em; white-space: nowrap; }
+    #unity-progress-bar-empty { width: 100%; height: 2px; background: #30302d; }
+    #unity-progress-bar-full { width: 0%; height: 100%; background: #ffffff; transition: width .2s linear; }
+    #loading-status { min-height: 40px; margin-top: 18px; color: #ffffff; font: 12px/1.8 sans-serif; letter-spacing: .04em; }
+    #unity-warning { position: fixed; z-index: 20; top: 16px; left: 5%; width: 90%; color: #eee; font: 13px/1.6 sans-serif; }
+    .unity-mobile { width: 100%; height: 100%; }
+    .unity-mobile #unity-canvas { width: 100%; height: 100%; }
+    .unity-mobile #unity-footer { display: none; }
+    @media (prefers-reduced-motion: reduce) { #unity-progress-bar-full { transition: none; } }
+  </style>
+</head>
+<body>
+  <div id="unity-container">
+    <canvas id="unity-canvas" width="960" height="600" tabindex="-1" aria-label="복제인간 시 게임"></canvas>
+    <div id="unity-footer"><button id="unity-fullscreen-button" type="button">전체 화면</button></div>
+  </div>
+  <div id="unity-loading-bar">
+    <div class="loading-content">
+      <h1>복제인간 시</h1>
+      <div id="unity-progress-bar-empty" aria-hidden="true"><div id="unity-progress-bar-full"></div></div>
+      <div id="loading-status" role="status" aria-live="polite">불러오는 중…</div>
     </div>
-    <script>
-      var canvas = document.querySelector("#unity-canvas");
-
-      // Shows a temporary message banner/ribbon for a few seconds, or
-      // a permanent error message on top of the canvas if type=='error'.
-      // If type=='warning', a yellow highlight color is used.
-      // Modify or remove this function to customize the visually presented
-      // way that non-critical warnings and error messages are presented to the
-      // user.
-      function unityShowBanner(msg, type) {
-        var warningBanner = document.querySelector("#unity-warning");
-        function updateBannerVisibility() {
-          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-        }
-        var div = document.createElement('div');
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
-        else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
-        }
-        updateBannerVisibility();
-      }
-
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/WebRehearsal.loader.js?v=657ff097e2ed5bdb";
-      var config = {
-        arguments: [],
-        dataUrl: buildUrl + "/WebRehearsal.data",
-        frameworkUrl: buildUrl + "/WebRehearsal.framework.js",
-        codeUrl: buildUrl + "/WebRehearsal.wasm",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "HCP_Teaser",
-        productVersion: "0.1.0",
-        showBanner: unityShowBanner,
-        // errorHandler: function(err, url, line) {
-        //    alert("error " + err + " occurred at line " + line);
-        //    // Return 'true' if you handled this error and don't want Unity
-        //    // to process it further, 'false' otherwise.
-        //    return true;
-        // },
-      };
-
-      // By default, Unity keeps WebGL canvas render target size matched with
-      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
-      // Set this to false if you want to decouple this synchronization from
-      // happening inside the engine, and you would instead like to size up
-      // the canvas DOM size and WebGL render target sizes yourself.
-      // config.matchWebGLToCanvasSize = false;
-
-      // If you would like all file writes inside Unity Application.persistentDataPath
-      // directory to automatically persist so that the contents are remembered when
-      // the user revisits the site the next time, uncomment the following line:
-      // config.autoSyncPersistentDataPath = true;
-      // This autosyncing is currently not the default behavior to avoid regressing
-      // existing user projects that might rely on the earlier manual
-      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
-      // expected to change.
-
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
-
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-        document.querySelector("#unity-container").className = "unity-mobile";
-        canvas.className = "unity-mobile";
-
-        // To lower canvas resolution on mobile devices to gain some
-        // performance, uncomment the following line:
-        // config.devicePixelRatio = 1;
-
-
-      } else {
-        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-        canvas.style.width = "960px";
-        canvas.style.height = "600px";
-      }
-
-      document.querySelector("#unity-loading-bar").style.display = "block";
-
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = async () => {
-        const manifest = {"dataUrl": [{"url": "Build/WebRehearsal.data.part0?v=43b90472e3bf6c1b", "bytes": 67108864}, {"url": "Build/WebRehearsal.data.part1?v=c7e6943c44fc03bd", "bytes": 67108864}, {"url": "Build/WebRehearsal.data.part2?v=9766a6d19b9539e3", "bytes": 43891061}], "frameworkUrl": [{"url": "Build/WebRehearsal.framework.js?v=91fa2916110f009f", "bytes": 815387}], "codeUrl": [{"url": "Build/WebRehearsal.wasm.part0?v=4a2116778c7f2271", "bytes": 67108864}, {"url": "Build/WebRehearsal.wasm.part1?v=50da568f417fbeb3", "bytes": 35573592}]};
+  </div>
+  <div id="unity-warning" role="alert"></div>
+  <script>
+    var canvas = document.querySelector("#unity-canvas");
+    function showLoadError(message) {
+      console.error(message);
+      var status = document.querySelector("#loading-status");
+      status.textContent = "불러오지 못했습니다. 다시 시도해 주세요.";
+      var retry = document.createElement("button");
+      retry.className = "retry"; retry.textContent = "다시 시도";
+      retry.onclick = () => location.reload();
+      status.append(document.createElement("br"), retry);
+    }
+    function unityShowBanner(message, type) {
+      if (type === "error") showLoadError(message);
+      else console.warn(message);
+    }
+    var buildUrl = "Build";
+    var loaderUrl = buildUrl + "/WebDeveloperLatest.loader.js?v=f08585aeaf2127b7";
+    var config = {
+      arguments: [],
+      dataUrl: buildUrl + "/WebDeveloperLatest.data",
+      frameworkUrl: buildUrl + "/WebDeveloperLatest.framework.js",
+      codeUrl: buildUrl + "/WebDeveloperLatest.wasm",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "DefaultCompany",
+      productName: "HCP_Teaser",
+      productVersion: "0.1.0",
+      showBanner: unityShowBanner
+    };
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      document.querySelector("#unity-container").className = "unity-mobile";
+    } else {
+      canvas.style.width = "min(960px, 100vw)";
+      canvas.style.height = "min(600px, calc(100dvh - 36px))";
+    }
+    var script = document.createElement("script");
+    script.src = loaderUrl;
+    script.onerror = () => showLoadError("Loader download failed");
+    script.onload = async () => {
+        const manifest = {"dataUrl": [{"url": "Build/WebDeveloperLatest.data.part0?v=f033459cfbd9e161", "bytes": 67108864}, {"url": "Build/WebDeveloperLatest.data.part1?v=82e8767c8e318224", "bytes": 67108864}, {"url": "Build/WebDeveloperLatest.data.part2?v=9532d7ae41dc291a", "bytes": 12583040}], "frameworkUrl": [{"url": "Build/WebDeveloperLatest.framework.js?v=323341d4a65a9e17", "bytes": 799517}], "codeUrl": [{"url": "Build/WebDeveloperLatest.wasm?v=63c8c38f47d298f2", "bytes": 45109023}]};
         const total = Object.values(manifest).flat().reduce((n,p)=>n+p.bytes,0);
         let received = 0;
         const blobs = [];
         const loading = document.querySelector('#unity-loading-bar');
         const bar = document.querySelector('#unity-progress-bar-full');
-        const status = document.createElement('div');
+        const status = document.querySelector('#loading-status') || document.createElement('div');
         status.setAttribute('role','status'); status.setAttribute('aria-live','polite');
-        status.style.cssText='color:white;text-align:center;width:280px;margin:14px 0 0 -63px;font:14px sans-serif;line-height:1.6';
-        loading.appendChild(status);
+        if(!status.isConnected){
+          status.style.cssText='color:white;text-align:center;width:280px;margin:14px 0 0 -63px;font:14px sans-serif;line-height:1.6';
+          loading.appendChild(status);
+        }
         const mb = n => (n/1000000).toFixed(1);
         function draw(){const p=Math.min(100,Math.floor(received/total*100));bar.style.width=(p*.9)+'%';status.textContent='다운로드 '+p+'% · '+mb(received)+' / '+mb(total)+' MB';}
         draw();
@@ -139,60 +104,21 @@
         try {
           await Promise.all(Object.entries(manifest).map(async ([key,parts])=>{
             const data=await Promise.all(parts.map(download));
-            const url=URL.createObjectURL(new Blob(data));blobs.push(url);config[key]=url;
+            const type=key==="codeUrl" && /\.wasm(?:\.part\d+)?(?:\?|$)/.test(parts[0].url) ? "application/wasm" : "application/octet-stream";
+            const url=URL.createObjectURL(new Blob(data,{type}));blobs.push(url);config[key]=url;
           }));
           status.textContent='다운로드 완료 · 게임 준비 중…';
         } catch(error){failed(error);return;}
 
-        createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#unity-progress-bar-full").style.width = (90 + 10 * progress) + "%";
-              }).then((unityInstance) => {
-                blobs.forEach(url=>URL.revokeObjectURL(url)); document.querySelector("#unity-loading-bar").style.display = "none";
-                document.querySelector("#unity-fullscreen-button").onclick = () => {
-                  unityInstance.SetFullscreen(1);
-                };
-
-                var profile = unityProfiler.createButton(unityInstance);
-                profile.style.marginLeft = '5px';
-                document.querySelector("#unity-build-title").appendChild(profile);
-
-                // Unloading web content from DOM so that browser GC can run can be tricky to get right.
-                // This code snippet shows how to correctly implement a Unity content Unload mechanism to a web page.
-
-                // Unloading Unity content enables a web page to reclaim the memory used by Unity, e.g. for
-                // the purpose of later loading another Unity content instance on the _same_ web page.
-
-                // When using this functionality, take caution to carefully make sure to clear all JavaScript code,
-                // DOM element and event handler references to the old content you may have retained, or
-                // otherwise the browser's garbage collector will be unable to reclaim the old page.
-
-                // N.b. Unity content does _not_ need to be manually unloaded when the user is navigating away from
-                // the current page to another web page. The browser will take care to clear memory of old visited
-                // pages automatically. This functionality is only needed if you want to switch between loading
-                // multiple Unity builds on a single web page.
-                var quit = document.createElement("button");
-                quit.style = "margin-left: 5px; background-color: lightgray; border: none; padding: 5px; cursor: pointer";
-                quit.innerHTML = "Unload";
-                document.querySelector("#unity-build-title").appendChild(quit);
-                quit.onclick = () => {
-                  // Quit Unity application execution
-                  unityInstance.Quit().then(() => {
-                    unityProfiler.shutDown();
-                    // Remove DOM elements from the page so GC can run
-                    document.querySelector("#unity-container").remove();
-                    canvas = null;
-                    // Remover script elements from the page so GC can run
-                    script.remove();
-                    script = null;
-                  });
-                };
-              }).catch((message) => {
-                failed(message);
-              });
-            };
-
-      document.body.appendChild(script);
-
-    </script>
-  </body>
+      createUnityInstance(canvas, config, (progress) => {
+        document.querySelector("#unity-progress-bar-full").style.width = (90 + 10 * progress) + "%";
+        document.querySelector("#loading-status").textContent = progress >= .9 ? "시작 준비 중…" : "불러오는 중 · " + Math.floor(progress * 100) + "%";
+      }).then((unityInstance) => {
+        blobs.forEach(url=>URL.revokeObjectURL(url)); document.querySelector("#unity-loading-bar").style.display = "none";
+        document.querySelector("#unity-fullscreen-button").onclick = () => unityInstance.SetFullscreen(1);
+      }).catch(showLoadError);
+    };
+    document.body.appendChild(script);
+  </script>
+</body>
 </html>
