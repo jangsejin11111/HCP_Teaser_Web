@@ -55,7 +55,7 @@
       else console.warn(message);
     }
     var buildUrl = "Build";
-    var loaderUrl = buildUrl + "/WebDeveloperLatest.loader.js?v=f08585aeaf2127b7";
+    var loaderUrl = buildUrl + "/WebDeveloperLatest.loader.js?v=ea5883c0f622820b";
     var config = {
       arguments: [],
       dataUrl: buildUrl + "/WebDeveloperLatest.data",
@@ -77,7 +77,7 @@
     script.src = loaderUrl;
     script.onerror = () => showLoadError("Loader download failed");
     script.onload = async () => {
-        const manifest = {"dataUrl": [{"url": "Build/WebDeveloperLatest.data.part0?v=f033459cfbd9e161", "bytes": 67108864}, {"url": "Build/WebDeveloperLatest.data.part1?v=82e8767c8e318224", "bytes": 67108864}, {"url": "Build/WebDeveloperLatest.data.part2?v=9532d7ae41dc291a", "bytes": 12583040}], "frameworkUrl": [{"url": "Build/WebDeveloperLatest.framework.js?v=323341d4a65a9e17", "bytes": 799517}], "codeUrl": [{"url": "Build/WebDeveloperLatest.wasm?v=63c8c38f47d298f2", "bytes": 45109023}]};
+        const manifest = {"dataUrl": [{"url": "Build/WebDeveloperLatest.data.part0?v=10f04980c5680ce4", "bytes": 67108864}, {"url": "Build/WebDeveloperLatest.data.part1?v=7157ff34d449fb04", "bytes": 67108864}, {"url": "Build/WebDeveloperLatest.data.part2?v=4a609535b667ad93", "bytes": 12754988}], "frameworkUrl": [{"url": "Build/WebDeveloperLatest.framework.js?v=323341d4a65a9e17", "bytes": 799517}], "codeUrl": [{"url": "Build/WebDeveloperLatest.wasm?v=5eb22529d30ffd6d", "bytes": 45139244}]};
         const total = Object.values(manifest).flat().reduce((n,p)=>n+p.bytes,0);
         let received = 0;
         const blobs = [];
