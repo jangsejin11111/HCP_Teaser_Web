@@ -1739,7 +1739,7 @@ function dbg(text) {
       var name = UTF8ToString(target);
       var state = { dead:false, stream:null, context:null, frame:0 };
       state.stop = function() {
-        state.dead=true; cancelAnimationFrame(state.frame);
+        if(state.dead)return; state.dead=true; cancelAnimationFrame(state.frame); SendMessage(name,"OnBrowserMicReady","0");
         if(state.stream) state.stream.getTracks().forEach(function(t){t.stop();});
         if(state.context) state.context.close().catch(function(){});
         document.removeEventListener('visibilitychange',state.visibility);
@@ -1760,13 +1760,17 @@ function dbg(text) {
         state.context.createMediaStreamSource(stream).connect(analyser);
         var samples=new Float32Array(analyser.fftSize), base=.02, last=performance.now(), next=last+500;
         state.hot=0;
+        var wasReady=false, levelTime=0;
         function tick(now){
           if(state.dead)return;
           var dt=Math.min((now-last)/1000,.05); last=now;
-          if(!document.hidden){
+          var listening=!document.hidden && state.context.state==="running";
+          if(listening!==wasReady){wasReady=listening;SendMessage(name,"OnBrowserMicReady",listening?"1":"0");}
+          if(listening){
             analyser.getFloatTimeDomainData(samples);
             var sum=0; for(var i=0;i<samples.length;i++)sum+=samples[i]*samples[i];
             var rms=Math.sqrt(sum/samples.length);
+            if(now-levelTime>=50){levelTime=now;SendMessage(name,"OnBrowserMicLevel",String(Math.min(1,rms/Math.max(.045,base*3))));}
             if(rms>Math.max(.045,base*3)){
               state.hot+=dt;
               if(state.hot>=.12 && now>=next){state.hot=0;next=now+900;SendMessage(name,'OnBrowserBreath','');}
@@ -17388,6 +17392,8 @@ var dynCall_vifii = Module["dynCall_vifii"] = createExportWrapper("dynCall_vifii
 /** @type {function(...*):?} */
 var dynCall_viiiffii = Module["dynCall_viiiffii"] = createExportWrapper("dynCall_viiiffii");
 /** @type {function(...*):?} */
+var dynCall_viiifii = Module["dynCall_viiifii"] = createExportWrapper("dynCall_viiifii");
+/** @type {function(...*):?} */
 var dynCall_fdi = Module["dynCall_fdi"] = createExportWrapper("dynCall_fdi");
 /** @type {function(...*):?} */
 var dynCall_viffiii = Module["dynCall_viffiii"] = createExportWrapper("dynCall_viffiii");
@@ -17395,8 +17401,6 @@ var dynCall_viffiii = Module["dynCall_viffiii"] = createExportWrapper("dynCall_v
 var dynCall_vifffii = Module["dynCall_vifffii"] = createExportWrapper("dynCall_vifffii");
 /** @type {function(...*):?} */
 var dynCall_viffffii = Module["dynCall_viffffii"] = createExportWrapper("dynCall_viffffii");
-/** @type {function(...*):?} */
-var dynCall_viiifii = Module["dynCall_viiifii"] = createExportWrapper("dynCall_viiifii");
 /** @type {function(...*):?} */
 var dynCall_viiiffffffii = Module["dynCall_viiiffffffii"] = createExportWrapper("dynCall_viiiffffffii");
 /** @type {function(...*):?} */
